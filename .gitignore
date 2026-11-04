@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.vite/
+*.local
+*.log
+npm-debug.log*
+
+# Local visual-test artifacts
+shot-*.png
+.edge-profile*/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#050712" />
+    <meta
+      name="description"
+      content="Neon Pong — a fast, glossy 3D take on the arcade classic, rendered with three.js and WebGPU."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>NEON PONG · three.js × WebGPU</title>
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="scanlines" aria-hidden="true"></div>
+
+      <header class="hud">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-name">NEON<em>PONG</em></span>
+        </div>
+
+        <div class="scoreboard" aria-live="polite" aria-atomic="true">
+          <div class="score side-cyan">
+            <span class="score-label">YOU</span>
+            <span class="score-value" id="player-score">0</span>
+          </div>
+          <div class="score-divider">
+            <span class="score-dot" aria-hidden="true"></span>
+            <span class="first-to">FIRST TO <b id="win-target">5</b></span>
+          </div>
+          <div class="score side-magenta">
+            <span class="score-label">CPU</span>
+            <span class="score-value" id="cpu-score">0</span>
+          </div>
+        </div>
+
+        <div class="hud-actions">
+          <div class="renderer-badge" id="renderer-badge" title="Graphics backend">
+            <span class="status-dot"></span>
+            <span id="renderer-name">BOOTING GPU</span>
+          </div>
+          <button class="icon-btn is-hidden" id="pause-btn" type="button" aria-label="Pause match">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="7" y="5" width="3.4" height="14" rx="1.7" />
+              <rect x="13.6" y="5" width="3.4" height="14" rx="1.7" />
+            </svg>
+          </button>
+          <button class="icon-btn" id="sound-btn" type="button" aria-label="Mute sound" aria-pressed="false">
+            <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9.5h3.2L12.5 5v14L7.2 14.5H4z" />
+              <path d="M16 8.6c1.7 1.8 1.7 4.9 0 6.7M18.9 6c2.9 3.2 2.9 8.8 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9.5h3.2L12.5 5v14L7.2 14.5H4z" />
+              <path d="m16.2 9.4 5 5.2M21.2 9.4l-5 5.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="ui">
+        <section class="panel start-panel" id="start-panel" aria-labelledby="game-title">
+          <div class="eyebrow"><span></span> ARCADE PROTOCOL / 01</div>
+          <h1 id="game-title">NEON<br /><span>PONG</span></h1>
+          <p class="tagline">
+            The classic, rebuilt in three dimensions.<br />
+            Powered by <strong>three.js</strong> and <strong>WebGPU</strong>.
+          </p>
+
+          <button class="primary-btn" id="play-btn" type="button">
+            <span>ENTER THE ARENA</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+
+          <div class="controls">
+            <div class="control">
+              <span class="control-key" id="move-key">MOUSE</span>
+              <span class="control-text" id="move-text">Move paddle</span>
+            </div>
+            <div class="control">
+              <span class="control-key" id="keys-key">W / S</span>
+              <span class="control-text" id="keys-text">Or arrow keys</span>
+            </div>
+            <div class="control">
+              <span class="control-key" id="serve-key">SPACE</span>
+              <span class="control-text" id="serve-text">Launch ball</span>
+            </div>
+          </div>
+          <p class="microcopy">First to five. The ball gets faster with every hit.</p>
+        </section>
+
+        <section class="panel pause-panel" id="pause-panel" aria-labelledby="pause-title">
+          <div class="eyebrow"><span></span> SIGNAL HELD</div>
+          <h2 id="pause-title">PAUSED</h2>
+          <p class="tagline">The grid is waiting.</p>
+          <button class="primary-btn" id="resume-btn" type="button">
+            <span>RESUME MATCH</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <p class="microcopy" id="pause-hint">Press <kbd>P</kbd> or <kbd>ESC</kbd> to resume</p>
+        </section>
+
+        <section class="panel end-panel" id="end-panel" aria-labelledby="end-title">
+          <div class="eyebrow"><span></span> MATCH COMPLETE</div>
+          <h2 id="end-title">YOU WIN</h2>
+          <p class="tagline" id="end-subtitle">The grid belongs to you.</p>
+          <div class="final-score">
+            <span class="side-cyan" id="final-player">5</span>
+            <span class="final-dash">—</span>
+            <span class="side-magenta" id="final-cpu">2</span>
+          </div>
+          <button class="primary-btn" id="rematch-btn" type="button">
+            <span>REMATCH</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </button>
+          <p class="microcopy" id="end-hint">Press <kbd>ENTER</kbd> to run it back</p>
+        </section>
+
+        <div class="countdown" id="countdown" aria-hidden="true">
+          <span id="countdown-value">3</span>
+        </div>
+        <div class="toast" id="toast" role="status"></div>
+      </main>
+
+      <footer class="footer">
+        <p class="hint" id="hint">
+          <span class="hint-dot"></span>
+          <span id="hint-text">MOVE MOUSE OR PRESS <kbd>W</kbd><kbd>S</kbd> TO READY UP</span>
+        </p>
+        <p class="build-tag">THREE.JS <span>×</span> <span id="build-backend">WEBGPU</span> <span class="build-sep">/</span> REALTIME</p>
+      </footer>
+
+      <div class="loading-screen" id="loading-screen">
+        <div class="loading-mark">NP</div>
+        <div class="loading-bar"><span></span></div>
+        <p>INITIALIZING RENDER PIPELINE</p>
+      </div>
+
+      <div class="unsupported hidden" id="unsupported">
+        <div class="unsupported-card">
+          <p class="eyebrow"><span></span> RENDERER ERROR</p>
+          <h2 id="error-title">GPU OFFLINE</h2>
+          <p id="error-message">The render pipeline could not start. Please reload the page or try a browser with WebGPU support.</p>
+          <button class="primary-btn" type="button" id="retry-btn"><span>RELOAD</span></button>
+        </div>
+      </div>
+
+      <noscript>This game needs JavaScript enabled.</noscript>
+    </div>
+  </body>
+</html>
